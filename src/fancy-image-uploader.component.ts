@@ -6,7 +6,7 @@ import {UploadedFile} from './uploaded-file';
 import 'rxjs/add/operator/filter';
 
 @Component({
-  selector: 'ng-image-upload',
+  selector: 'fancy-image-uploader',
   templateUrl: './fancy-image-uploader.component.html',
   styleUrls: ['./fancy-image-uploader.component.css'],
   host: {
