@@ -9,9 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "tsc",
-    "all": "concurrently \"tsc -w \" \"tsc -p runtime -w \" \"npm run lite\" ",
-    "watch": "tsc -w "
+    "prepublish": "webpack",
+    "watch": "webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -47,7 +46,10 @@
   "devDependencies": {
     "@types/core-js": "^0.9.32",
     "@types/node": "^6.0.38",
-    "typescript": "^2.0.2"
+    "awesome-typescript-loader": "^1.1.1",
+    "raw-loader": "^0.5.1",
+    "typescript": "^2.0.2",
+    "webpack": "^1.13.2"
   },
   "files": [
     "dist"

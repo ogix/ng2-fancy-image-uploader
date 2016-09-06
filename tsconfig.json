@@ -22,5 +22,8 @@
     "node_modules",
     "dist",
     "example"
-  ]
+  ],
+  "awesomeTypescriptLoaderOptions": {
+    "useWebpackText": true
+  }
 }
