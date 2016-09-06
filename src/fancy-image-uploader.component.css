@@ -1,0 +1,117 @@
+:host {
+  display: block;
+}
+
+.add-image-btn {
+  width: 100%;
+  height: 100%;
+  font-weight: bold;
+  opacity: 0.5;
+  border: 0;
+}
+
+.add-image-btn:hover {
+  opacity: .7;
+  cursor: pointer;
+  background-color: #ddd;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+}
+
+.add-image-btn .plus {
+  font-size: 30px;
+  font-weight: normal;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+img {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%)
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: inline-block;
+  background-color: #f1f1f1;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+.remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 25px;
+  text-align: center;
+  opacity: 0.8;
+  border: 0;
+  cursor: pointer;
+}
+
+.image-container > .remove:hover {
+  opacity: 0.7;
+  background-color: #fff;
+}
+
+.error .remove {
+  opacity: 0.5;
+}
+
+.error .remove:hover {
+  opacity: 0.7;
+}
+
+input {
+  display: none;
+}
+
+.error {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e3a5a2;
+  color: #d2706b;
+  background-color: #fbf1f0;
+  position: relative;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.error-message {
+  width: 100%;
+  line-height: 18px;
+}
+
+.progress-bar {
+  position: absolute;
+  bottom:10%;
+  left:10%;
+  width: 80%;
+  height: 5px;
+  background-color: grey;
+  opacity: 0.9;
+  overflow: hidden;
+}
+
+.bar {
+  position: absolute;
+  height: 100%;
+  background-color: #a4c639;
+}
+
+.drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: yellow;
+  opacity: 0.3;
+}
