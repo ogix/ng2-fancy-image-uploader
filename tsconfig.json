@@ -10,9 +10,9 @@
     "moduleResolution": "node",
     "rootDir": ".",
     "outDir": "./dist/",
-	"types": [
+    "types": [
       "node",
-	  "core-js"
+      "core-js"
     ]
   },
   "files": [
