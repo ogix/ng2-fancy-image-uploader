@@ -1,6 +1,6 @@
 {
   "name": "ng2-fancy-image-uploader",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular2 asynchronous image uploader with preview",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -p --colors --progress --display-error-details --display-cached",
-	"prepublish": "build",
+	"prepublish": "npm run build",
     "watch": "webpack --watch"
   },
   "repository": {
