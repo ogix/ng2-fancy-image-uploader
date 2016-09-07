@@ -7,8 +7,8 @@ import 'rxjs/add/operator/filter';
 
 @Component({
   selector: 'fancy-image-uploader',
-  templateUrl: './fancy-image-uploader.component.html',
-  styleUrls: [ './fancy-image-uploader.component.css'],
+  template: require('./fancy-image-uploader.component.html'),
+  styles: [require('./fancy-image-uploader.component.css')],
   host: {
     '[style.width]': 'thumbnailWidth + "px"',
     '[style.height]': 'thumbnailHeight + "px"',
