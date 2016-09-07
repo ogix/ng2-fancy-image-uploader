@@ -3,6 +3,7 @@ import {Subject} from 'rxjs/Subject';
 import {Observable} from 'rxjs/Observable';
 import {UploadedFile} from './uploaded-file';
 import {FileUploaderOptions} from './interfaces';
+//import {BlobBuilder} from 'core-js/BlobBuilder';
 
 @Injectable()
 export class FileUploader {
@@ -77,6 +78,35 @@ export class FileUploader {
 
     xhr.send(form);
     return uploadingFile.id;
+  }
+
+  getFile(url: string): Observable<File> {
+    return Observable.create(observer => {
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+
+      xhr.onload = () => {
+        let success = this.isSuccessCode(xhr.status);
+
+        if (!success) {
+          observer.error(xhr.status);
+          observer.complete();
+        }
+
+        let contentType = xhr.getResponseHeader('Content-Type');
+        let blob = new File([xhr.response], 'filename', {type: contentType});
+        observer.next(blob);
+        observer.complete();
+      };
+
+      xhr.onerror = (e) => {
+        observer.error(xhr.status);
+        observer.complete();
+      };
+
+      xhr.send();
+    });
   }
 
   private setDefaults(options: FileUploaderOptions) {

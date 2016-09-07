@@ -7,8 +7,8 @@ import 'rxjs/add/operator/filter';
 
 @Component({
   selector: 'fancy-image-uploader',
-  template: require('./fancy-image-uploader.component.html'),
-  styles: [ require('./fancy-image-uploader.component.css')],
+  templateUrl: './fancy-image-uploader.component.html',
+  styleUrls: [ './fancy-image-uploader.component.css'],
   host: {
     '[style.width]': 'thumbnailWidth + "px"',
     '[style.height]': 'thumbnailHeight + "px"',
@@ -31,7 +31,7 @@ export class FancyImageUploaderComponent implements OnInit {
   @ViewChild('fileInput') fileInputElement: ElementRef;
   @ViewChild('dragOverlay') dragOverlayElement: ElementRef;
   @Input() options: FancyImageUploaderOptions;
-  @Output() onUpload: EventEmitter<UploadedFile> = new EventEmitter();
+  @Output() onUpload: EventEmitter<UploadedFile> = new EventEmitter<UploadedFile>();
 
   constructor(
     private renderer: Renderer,
@@ -45,6 +45,22 @@ export class FancyImageUploaderComponent implements OnInit {
       }
       if (this.options.thumbnailHeight) {
         this.thumbnailHeight = this.options.thumbnailHeight;
+      }
+      if (this.options.thumbnailUrl) {
+        this.uploader.getFile(this.options.thumbnailUrl).subscribe(file => {
+          // thumbnail
+          let result: ImageResult = {
+            file: file,
+            url: URL.createObjectURL(file)
+          };
+
+          this.resize(result).then(r => {
+            this.imageThumbnail = r.resized.dataURL;
+            this.imageSelected = true;
+          });
+        }, error => {
+          this.errorMessage = error || 'Error while getting an image';
+        });
       }
     }
   }
@@ -105,7 +121,7 @@ export class FancyImageUploaderComponent implements OnInit {
       url: URL.createObjectURL(file)
     };
 
-    this.fileToDataURL(file, result).then(r => this.resize(r)).then(r => {
+    this.resize(result).then(r => {
       this.imageThumbnail = r.resized.dataURL;
       this.imageSelected = true;
     });
