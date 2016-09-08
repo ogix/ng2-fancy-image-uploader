@@ -3,7 +3,7 @@
 
 # dependencies
 /node_modules
-/example/node_modules
+/demo/node_modules
 
 # IDEs and editors
 /.idea
@@ -13,10 +13,7 @@
 /coverage/*
 /libpeerconnection.log
 npm-debug.log
-/example/npm-debug.log
 testem.log
-/typings
-/example/typings
 /dist
 
 # e2e

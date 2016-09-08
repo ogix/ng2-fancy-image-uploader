@@ -2,13 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
-    "outDir": "./dist",
+    "outDir": "dist",
     "baseUrl": "./src",
     "sourceMap": true,
-    "declaration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "removeComments": true,
     "moduleResolution": "node",
     "types": [
       "core-js",
@@ -16,15 +14,12 @@
     ]
   },
   "exclude": [
-    "node_modules",
-    "demo"
+    "node_modules"
   ],
   "awesomeTypescriptLoaderOptions": {
     "useWebpackText": true
   },
   "compileOnSave": false,
   "buildOnSave": false,
-  "atom": {
-    "rewriteTsconfig": false
-  }
+  "atom": { "rewriteTsconfig": false }
 }

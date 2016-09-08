@@ -1,0 +1,12 @@
+<div class="header-wrapper">
+  <h1 class="ui header centered margined">Fancy Image Uploader Demo</h1>
+<div>
+<div class="ui container centered grid">
+  <div class="column">
+    <div class="ui raised segment">
+      <h3>Basic upload example</h3>
+      <fancy-image-uploader [options]="options" (onUpload)="onUpload($event)"></fancy-image-uploader>
+      <p>Response: {{response}}</p>
+    </div>
+  </div>
+</div>
