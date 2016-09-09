@@ -10,7 +10,7 @@ export class Home {
   options: FancyImageUploaderOptions = {
       thumbnailHeight: 200,
       thumbnailWidth: 200,
-      uploadUrl: 'http://57d1d17ddaccc81100513fce.mockapi.io/upload',
+      uploadUrl: 'https://fancy-image-uploader-demo.azurewebsites.net/api/demo/upload',
       allowedImageTypes: ['image/png', 'image/jpeg'],
       maxImageSize: 3
   };
