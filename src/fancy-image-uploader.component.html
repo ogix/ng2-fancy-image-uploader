@@ -9,7 +9,7 @@
 
   <img [src]="imageThumbnail" #imageElement (click)="onImageClicked()" *ngIf="imageSelected && !errorMessage">
   <input type="file" #fileInput (change)="onFileChanged()">
-  <button class="remove" (click)="removeImage()" *ngIf="imageSelected">×</button>
+  <button type="button" class="remove" (click)="removeImage()" *ngIf="imageSelected">×</button>
 
   <div class="error" *ngIf="errorMessage">
     <div class="error-message">

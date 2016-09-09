@@ -1,4 +1,5 @@
-import {Component, OnInit, ViewChild, ElementRef, Renderer, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
+import {Component, OnInit, ViewChild, ElementRef, Renderer, Input, Output, EventEmitter, ChangeDetectorRef, forwardRef} from '@angular/core';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {FancyImageUploaderOptions, ImageResult, ResizeOptions} from './interfaces';
 import {createImage, resizeImage} from './utils';
 import {FileUploader} from './file-uploader';
@@ -16,16 +17,24 @@ import 'rxjs/add/operator/filter';
     '(dragenter)': 'dragenter($event)',
     '(dragover)': 'dragover($event)',
     '(dragleave)': 'dragleave($event)',
-  }
+  },
+  providers: [
+    { 
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => FancyImageUploaderComponent),
+      multi: true
+    }
+  ]
 })
-export class FancyImageUploaderComponent implements OnInit {
+export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor {
   thumbnailWidth: number = 150;
   thumbnailHeight: number = 150;
-  imageThumbnail: any;
+  _imageThumbnail: any;
   imageSelected: boolean;
   showProgress: boolean;
   progress: number;
   errorMessage: string;
+  propagateChange = (_: any) => {};
 
   @ViewChild('imageElement') imageElement: ElementRef;
   @ViewChild('fileInput') fileInputElement: ElementRef;
@@ -38,6 +47,31 @@ export class FancyImageUploaderComponent implements OnInit {
     private uploader: FileUploader,
     private changeDetector: ChangeDetectorRef) { }
 
+  get imageThumbnail() {
+    return this._imageThumbnail;
+  }
+
+  set imageThumbnail(value) {
+    this._imageThumbnail = value;
+    this.propagateChange(this._imageThumbnail);
+    this.imageSelected = value !== undefined;
+  }
+
+  writeValue(value: any) {
+    if (value) {
+      this.loadAndResize(value);
+    } else {
+      this._imageThumbnail = undefined;
+      this.imageSelected = false;
+    }
+  }
+
+  registerOnChange(fn) {
+    this.propagateChange = fn;
+  }
+
+  registerOnTouched() {}
+
   ngOnInit() {
     if (this.options) {
       if (this.options.thumbnailWidth) {
@@ -47,22 +81,25 @@ export class FancyImageUploaderComponent implements OnInit {
         this.thumbnailHeight = this.options.thumbnailHeight;
       }
       if (this.options.thumbnailUrl) {
-        this.uploader.getFile(this.options.thumbnailUrl).subscribe(file => {
-          // thumbnail
-          let result: ImageResult = {
-            file: file,
-            url: URL.createObjectURL(file)
-          };
-
-          this.resize(result).then(r => {
-            this.imageThumbnail = r.resized.dataURL;
-            this.imageSelected = true;
-          });
-        }, error => {
-          this.errorMessage = error || 'Error while getting an image';
-        });
+        //this.loadAndResize(this.options.thumbnailUrl);
       }
     }
+  }
+
+  loadAndResize(url: string) {
+    this.uploader.getFile(url).subscribe(file => {
+      // thumbnail
+      let result: ImageResult = {
+        file: file,
+        url: URL.createObjectURL(file)
+      };
+
+      this.resize(result).then(r => {
+        this.imageThumbnail = r.resized.dataURL;
+      });
+    }, error => {
+      this.errorMessage = error || 'Error while getting an image';
+    });
   }
 
   onImageClicked() {
@@ -129,13 +166,13 @@ export class FancyImageUploaderComponent implements OnInit {
 
   removeImage() {
     this.fileInputElement.nativeElement.value = null;
-    this.imageSelected = false;
+    this.imageThumbnail = undefined;
     this.progress = 0;
     this.showProgress = false;
   }
 
   dismissError() {
-    this.errorMessage = null;
+    this.errorMessage = undefined;
     this.removeImage();
   }
 
