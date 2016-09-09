@@ -2,6 +2,9 @@
 
 Angular2 component that uploads selected or dropped image asynchronously with preview.
 
+### Demo
+See demo here: [demo](https://ogix.github.io/fancy-image-uploader-demo)
+
 ### Install
 ```
 npm install ng2-fancy-image-uploader --save
