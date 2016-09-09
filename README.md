@@ -1,4 +1,4 @@
-# Angular2 Fancy Image Uploader [![npm version](https://badge.fury.io/js/ng2-fancy-image-uploader.svg)](https://badge.fury.io/js/ng2-fancy-image-uploader) ![Dependencies](https://david-dm.org/ogix/ng2-fancy-image-uploader.svg)
+# Fancy Image Uploader [![npm version](https://badge.fury.io/js/ng2-fancy-image-uploader.svg)](https://badge.fury.io/js/ng2-fancy-image-uploader) ![Dependencies](https://david-dm.org/ogix/ng2-fancy-image-uploader.svg)
 
 Angular2 component that uploads selected or dropped image asynchronously with preview.
 
