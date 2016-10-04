@@ -18,7 +18,7 @@
     </div>
 
     <div *ngSwitchCase="status.Uploading">
-      <img [src]="imageThumbnail" #imageElement (click)="onImageClicked()">
+      <img [attr.src]="imageThumbnail ? imageThumbnail : null" #imageElement (click)="onImageClicked()">
 
       <div class="progress-bar">
         <div class="bar" [style.width]="progress+'%'"></div>
