@@ -92,12 +92,18 @@ export class FileUploader {
         if (!success) {
           observer.error(xhr.status);
           observer.complete();
-        }
+        } else {
+          let contentType = xhr.getResponseHeader('Content-Type');
+          let blob = new File([xhr.response], 'filename', {type: contentType});
 
-        let contentType = xhr.getResponseHeader('Content-Type');
-        let blob = new File([xhr.response], 'filename', {type: contentType});
-        observer.next(blob);
-        observer.complete();
+          if (blob.size > 0) {
+            observer.next(blob);
+            observer.complete();
+          } else {
+            observer.error('No image');
+            observer.complete();
+          }
+        }
       };
 
       xhr.onerror = (e) => {
