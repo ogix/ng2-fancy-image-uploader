@@ -80,7 +80,7 @@ export class FileUploader {
     return uploadingFile.id;
   }
 
-  getFile(url: string): Observable<File> {
+  getFile(url: string, options: { authToken?: string, authTokenPrefix?: string}): Observable<File> {
     return Observable.create(observer => {
       let xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
@@ -110,6 +110,10 @@ export class FileUploader {
         observer.error(xhr.status);
         observer.complete();
       };
+
+      if (options.authToken) {
+        xhr.setRequestHeader("Authorization", `${options.authTokenPrefix} ${options.authToken}`);
+      }
 
       xhr.send();
     });

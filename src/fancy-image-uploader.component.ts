@@ -114,7 +114,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
   loadAndResize(url: string) {
     this.statusValue = Status.Loading;
 
-    this.uploader.getFile(url).subscribe(file => {
+    this.uploader.getFile(url, this.options).subscribe(file => {
       // thumbnail
       let result: ImageResult = {
         file: file,
