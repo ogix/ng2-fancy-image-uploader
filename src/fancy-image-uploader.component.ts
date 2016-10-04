@@ -6,6 +6,14 @@ import {FileUploader} from './file-uploader';
 import {UploadedFile} from './uploaded-file';
 import 'rxjs/add/operator/filter';
 
+export enum Status {
+  NotSelected,
+  Selected,
+  Uploading,
+  Loading,
+  Error
+}
+
 @Component({
   selector: 'fancy-image-uploader',
   template: require('./fancy-image-uploader.component.html'),
@@ -27,13 +35,14 @@ import 'rxjs/add/operator/filter';
   ]
 })
 export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor {
+  status = Status;
+  statusValue: Status = Status.NotSelected;
+
   thumbnailWidth: number = 150;
   thumbnailHeight: number = 150;
   _imageThumbnail: any;
-  imageSelected: boolean;
-  showProgress: boolean;
+  _errorMessage: string;
   progress: number;
-  errorMessage: string;
   propagateChange = (_: any) => {};
 
   @ViewChild('imageElement') imageElement: ElementRef;
@@ -54,7 +63,26 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
   set imageThumbnail(value) {
     this._imageThumbnail = value;
     this.propagateChange(this._imageThumbnail);
-    this.imageSelected = value !== undefined;
+
+    if (value !== undefined) {
+      this.statusValue = Status.Selected
+    } else {
+      this.statusValue = Status.NotSelected;
+    }
+  }
+
+  get errorMessage() {
+    return this._errorMessage;
+  }
+
+  set errorMessage(value) {
+    this._errorMessage = value;
+
+    if (value) {
+      this.statusValue = Status.Error;
+    } else {
+      this.statusValue = Status.NotSelected;
+    }
   }
 
   writeValue(value: any) {
@@ -62,7 +90,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       this.loadAndResize(value);
     } else {
       this._imageThumbnail = undefined;
-      this.imageSelected = false;
+      this.statusValue = Status.NotSelected;
     }
   }
 
@@ -84,6 +112,8 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
   }
 
   loadAndResize(url: string) {
+    this.statusValue = Status.Loading;
+
     this.uploader.getFile(url).subscribe(file => {
       // thumbnail
       let result: ImageResult = {
@@ -92,7 +122,8 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       };
 
       this.resize(result).then(r => {
-        this.imageThumbnail = r.resized.dataURL;
+        this._imageThumbnail = r.resized.dataURL;
+        this.statusValue = Status.Selected;
       });
     }, error => {
       this.errorMessage = error || 'Error while getting an image';
@@ -111,6 +142,8 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
   }
 
   validateAndUpload(file: File) {
+    this.propagateChange(null);
+
     if (this.options && this.options.allowedImageTypes) {
       if (!this.options.allowedImageTypes.some(allowedType => file.type === allowedType)) {
         this.errorMessage = 'Only these image types are allowed: ' + this.options.allowedImageTypes.join(', ');
@@ -126,7 +159,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     }
 
     this.progress = 0;
-    this.showProgress = true;
+    this.statusValue = Status.Uploading;
     let id = this.uploader.uploadFile(file, this.options);
 
     // file progress
@@ -144,6 +177,11 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       }
 
       if (file.done) {
+        // notify that value was changed only when image was uploaded and no error
+        if (!file.error) {
+          this.propagateChange(this._imageThumbnail);
+          this.statusValue = Status.Selected;
+        }
         this.onUpload.emit(file);
         sub.unsubscribe();
       }
@@ -156,16 +194,13 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     };
 
     this.resize(result).then(r => {
-      this.imageThumbnail = r.resized.dataURL;
-      this.imageSelected = true;
+      this._imageThumbnail = r.resized.dataURL;
     });
   }
 
   removeImage() {
     this.fileInputElement.nativeElement.value = null;
     this.imageThumbnail = undefined;
-    this.progress = 0;
-    this.showProgress = false;
   }
 
   dismissError() {
