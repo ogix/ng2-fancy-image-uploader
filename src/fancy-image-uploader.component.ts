@@ -108,7 +108,9 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       if (this.options.thumbnailHeight) {
         this.thumbnailHeight = this.options.thumbnailHeight;
       }
-      this.options.resizeOnLoad = this.options.resizeOnLoad || true;
+      if (this.options.resizeOnLoad === undefined) {
+        this.options.resizeOnLoad = true;
+      }
     }
   }
 
