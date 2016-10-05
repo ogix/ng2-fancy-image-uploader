@@ -13,6 +13,7 @@ export interface FancyImageUploaderOptions extends FileUploaderOptions {
   thumbnailWidth?: number;
   allowedImageTypes?: string[];
   maxImageSize?: number;
+  resizeOnLoad?: boolean;
 }
 
 export interface ImageResult {

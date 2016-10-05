@@ -108,6 +108,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       if (this.options.thumbnailHeight) {
         this.thumbnailHeight = this.options.thumbnailHeight;
       }
+      this.options.resizeOnLoad = this.options.resizeOnLoad || true;
     }
   }
 
@@ -115,16 +116,28 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     this.statusValue = Status.Loading;
 
     this.uploader.getFile(url, this.options).subscribe(file => {
-      // thumbnail
-      let result: ImageResult = {
-        file: file,
-        url: URL.createObjectURL(file)
-      };
+      if (this.options.resizeOnLoad) {
+        // thumbnail
+        let result: ImageResult = {
+          file: file,
+          url: URL.createObjectURL(file)
+        };
 
-      this.resize(result).then(r => {
-        this._imageThumbnail = r.resized.dataURL;
-        this.statusValue = Status.Selected;
-      });
+        this.resize(result).then(r => {
+          this._imageThumbnail = r.resized.dataURL;
+          this.statusValue = Status.Selected;
+        });
+      } else {
+        let result: ImageResult = {
+          file: null,
+          url: null
+        };
+
+        this.fileToDataURL(file, result).then(r => {
+          this._imageThumbnail = r.dataURL;
+          this.statusValue = Status.Selected;
+        });
+      }
     }, error => {
       this.errorMessage = error || 'Error while getting an image';
     });
