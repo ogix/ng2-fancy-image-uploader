@@ -13,8 +13,8 @@ module.exports = {
   },
   externals: [nodeExternals()], // in order to ignore all modules in node_modules folder
   resolve: {
-    root: [path.join(__dirname, 'src')],
-    extensions: ['', '.ts', '.js']
+    modules: [path.join(__dirname, 'src')],
+    extensions: ['.ts', '.js']
   },
   module: {
     loaders: [
