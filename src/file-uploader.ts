@@ -2,8 +2,7 @@ import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
 import {Observable} from 'rxjs/Observable';
 import {UploadedFile} from './uploaded-file';
-import {FileUploaderOptions} from './interfaces';
-//import {BlobBuilder} from 'core-js/BlobBuilder';
+import {FileUploaderOptions, CropOptions} from './interfaces';
 
 @Injectable()
 export class FileUploader {
@@ -17,11 +16,19 @@ export class FileUploader {
     return this._fileProgress$.asObservable();
   }
 
-  uploadFile(file: File, options: FileUploaderOptions): string {
+  uploadFile(file: File, options: FileUploaderOptions, cropOptions?: CropOptions): string {
     this.setDefaults(options);
     let xhr = new XMLHttpRequest();
     let form = new FormData();
+
     form.append(options.fieldName, file, file.name);
+
+    if (cropOptions) {
+      form.append('X', cropOptions.x);
+      form.append('Y', cropOptions.y);
+      form.append('Width', cropOptions.width);
+      form.append('Height', cropOptions.height);
+    }
 
     let uploadingFile = new UploadedFile(
         this.generateRandomIndex(),

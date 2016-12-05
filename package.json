@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@types/core-js": "^0.9.32",
+    "@types/cropperjs": "0.0.22",
     "@types/node": "^6.0.38",
     "awesome-typescript-loader": "^2.2.3",
     "raw-loader": "^0.5.1",

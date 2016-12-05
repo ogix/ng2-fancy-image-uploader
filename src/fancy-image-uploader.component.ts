@@ -1,16 +1,18 @@
-import {Component, OnInit, ViewChild, ElementRef, Renderer, Input, Output, EventEmitter, ChangeDetectorRef, forwardRef} from '@angular/core';
+import {Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef, Renderer, Input, Output, EventEmitter, ChangeDetectorRef, forwardRef} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {FancyImageUploaderOptions, ImageResult, ResizeOptions} from './interfaces';
 import {createImage, resizeImage} from './utils';
 import {FileUploader} from './file-uploader';
 import {UploadedFile} from './uploaded-file';
 import 'rxjs/add/operator/filter';
+import Cropper from 'cropperjs';
 
 export enum Status {
   NotSelected,
   Selected,
   Uploading,
   Loading,
+  Loaded,
   Error
 }
 
@@ -34,9 +36,9 @@ export enum Status {
     }
   ]
 })
-export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor {
-  status = Status;
-  statusValue: Status = Status.NotSelected;
+export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterViewChecked, ControlValueAccessor {
+  statusEnum = Status;
+  _status: Status = Status.NotSelected;
 
   thumbnailWidth: number = 150;
   thumbnailHeight: number = 150;
@@ -44,12 +46,18 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
   _errorMessage: string;
   progress: number;
   propagateChange = (_: any) => {};
+  origImageWidth: number;
+  orgiImageHeight: number;
+
+  cropper: cropperjs.Cropper = undefined;
+  fileToUpload: File;
 
   @ViewChild('imageElement') imageElement: ElementRef;
   @ViewChild('fileInput') fileInputElement: ElementRef;
   @ViewChild('dragOverlay') dragOverlayElement: ElementRef;
   @Input() options: FancyImageUploaderOptions;
   @Output() onUpload: EventEmitter<UploadedFile> = new EventEmitter<UploadedFile>();
+  @Output() onStatusChange: EventEmitter<Status> = new EventEmitter<Status>();
 
   constructor(
     private renderer: Renderer,
@@ -65,9 +73,9 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     this.propagateChange(this._imageThumbnail);
 
     if (value !== undefined) {
-      this.statusValue = Status.Selected
+      this.status = Status.Selected
     } else {
-      this.statusValue = Status.NotSelected;
+      this.status = Status.NotSelected;
     }
   }
 
@@ -79,10 +87,19 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     this._errorMessage = value;
 
     if (value) {
-      this.statusValue = Status.Error;
+      this.status = Status.Error;
     } else {
-      this.statusValue = Status.NotSelected;
+      this.status = Status.NotSelected;
     }
+  }
+
+  get status() {
+    return this._status;
+  }
+
+  set status(value) {
+    this._status = value;
+    this.onStatusChange.emit(value);
   }
 
   writeValue(value: any) {
@@ -90,7 +107,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       this.loadAndResize(value);
     } else {
       this._imageThumbnail = undefined;
-      this.statusValue = Status.NotSelected;
+      this.status = Status.NotSelected;
     }
   }
 
@@ -111,11 +128,37 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       if (this.options.resizeOnLoad === undefined) {
         this.options.resizeOnLoad = true;
       }
+      if (this.options.autoUpload === undefined) {
+        this.options.autoUpload = true;
+      }
+      if (this.options.cropEnabled === undefined) {
+        this.options.cropEnabled = false;
+      }
+
+      if (this.options.autoUpload && this.options.cropEnabled) {
+        throw new Error('autoUpload and cropEnabled cannot be enabled simultaneously');
+      }
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.options && this.options.cropEnabled && this.imageElement && this.fileToUpload && !this.cropper) {
+      this.cropper = new Cropper(this.imageElement.nativeElement, {
+        viewMode: 1,
+        aspectRatio: this.options.cropAspectRatio ? this.options.cropAspectRatio : null
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.cropper) {
+      this.cropper.destroy();
+      this.cropper = null;
     }
   }
 
   loadAndResize(url: string) {
-    this.statusValue = Status.Loading;
+    this.status = Status.Loading;
 
     this.uploader.getFile(url, this.options).subscribe(file => {
       if (this.options.resizeOnLoad) {
@@ -127,7 +170,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
 
         this.resize(result).then(r => {
           this._imageThumbnail = r.resized.dataURL;
-          this.statusValue = Status.Selected;
+          this.status = Status.Loaded;
         });
       } else {
         let result: ImageResult = {
@@ -137,7 +180,7 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
 
         this.fileToDataURL(file, result).then(r => {
           this._imageThumbnail = r.dataURL;
-          this.statusValue = Status.Selected;
+          this.status = Status.Loaded;
         });
       }
     }, error => {
@@ -173,9 +216,48 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
       }
     }
 
+    this.fileToUpload = file;
+
+    if (this.options && this.options.autoUpload) {
+      this.upload();
+    }
+
+    // thumbnail
+    let result: ImageResult = {
+      file: file,
+      url: URL.createObjectURL(file)
+    };
+
+    this.resize(result).then(r => {
+      this._imageThumbnail = r.resized.dataURL;
+      this.origImageWidth = r.width;
+      this.orgiImageHeight = r.height;
+
+      if (this.options && !this.options.autoUpload) {
+        this.status = Status.Selected;
+      }
+    });
+  }
+
+  upload() {
     this.progress = 0;
-    this.statusValue = Status.Uploading;
-    let id = this.uploader.uploadFile(file, this.options);
+    this.status = Status.Uploading;
+
+    let cropOptions = undefined;
+
+    if (this.cropper) {
+      let scale = this.origImageWidth / this.cropper.getImageData().naturalWidth;
+      let cropData = this.cropper.getData();
+
+      cropOptions = {
+        x: Math.round(cropData.x * scale),
+        y: Math.round(cropData.y * scale),
+        width: Math.round(cropData.width * scale),
+        height: Math.round(cropData.height * scale)
+      };
+    }
+
+    let id = this.uploader.uploadFile(this.fileToUpload, this.options, cropOptions);
 
     // file progress
     let sub = this.uploader.fileProgress$.filter(file => file.id === id).subscribe(file => {
@@ -195,27 +277,23 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
         // notify that value was changed only when image was uploaded and no error
         if (!file.error) {
           this.propagateChange(this._imageThumbnail);
-          this.statusValue = Status.Selected;
+          this.status = Status.Selected;
+          this.fileToUpload = undefined;
         }
         this.onUpload.emit(file);
         sub.unsubscribe();
       }
-    });
-
-    // thumbnail
-    let result: ImageResult = {
-      file: file,
-      url: URL.createObjectURL(file)
-    };
-
-    this.resize(result).then(r => {
-      this._imageThumbnail = r.resized.dataURL;
     });
   }
 
   removeImage() {
     this.fileInputElement.nativeElement.value = null;
     this.imageThumbnail = undefined;
+
+    if (this.cropper) {
+      this.cropper.destroy();
+      this.cropper = null;
+    }
   }
 
   dismissError() {
@@ -265,16 +343,21 @@ export class FancyImageUploaderComponent implements OnInit, ControlValueAccessor
     let resizeOptions: ResizeOptions = {
       resizeHeight: this.thumbnailHeight,
       resizeWidth: this.thumbnailWidth,
-      resizeType: result.file.type
+      resizeType: result.file.type,
+      resizeMode: this.options.thumbnailResizeMode
     };
 
     return new Promise((resolve) => {
       createImage(result.url, image => {
         let dataUrl = resizeImage(image, resizeOptions);
+        
+        result.width = image.width;
+        result.height = image.height;
         result.resized = {
           dataURL: dataUrl,
           type: this.getType(dataUrl)
         };
+
         resolve(result);
       });
     });

@@ -26,30 +26,57 @@ export function resizeImage(origImage: HTMLImageElement, {
   resizeHeight,
   resizeWidth,
   resizeQuality = 0.7,
-  resizeType = 'image/jpeg'
+  resizeType = 'image/jpeg',
+  resizeMode = 'fill'
 }: ResizeOptions = {}) {
 
   let canvas = getResizeArea();
 
   let height = origImage.height;
   let width = origImage.width;
+  let offsetX = 0;
+  let offsetY = 0;
 
-  // calculate the width and height, constraining the proportions
-  if (width / height > resizeWidth / resizeHeight) {
-    width = Math.round(height * resizeWidth / resizeHeight);
+  if (resizeMode === 'fill') {
+    // calculate the width and height, constraining the proportions
+    if (width / height > resizeWidth / resizeHeight) {
+      width = Math.round(height * resizeWidth / resizeHeight);
+    } else {
+      height = Math.round(width * resizeHeight / resizeWidth);
+    }
+
+    canvas.width = resizeWidth <= width ? resizeWidth : width;
+    canvas.height = resizeHeight <= height ? resizeHeight : height;
+
+    offsetX = origImage.width / 2 - width / 2;
+    offsetY = origImage.height / 2 - height / 2;
+
+    //draw image on canvas
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(origImage, offsetX, offsetY, width, height, 0, 0, canvas.width, canvas.height);
+  } else if (resizeMode === 'fit') {
+      // calculate the width and height, constraining the proportions
+      if (width > height) {
+          if (width > resizeWidth) {
+              height = Math.round(height *= resizeWidth / width);
+              width = resizeWidth;
+          }
+      } else {
+          if (height > resizeHeight) {
+              width = Math.round(width *= resizeHeight / height);
+              height = resizeHeight;
+          }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      //draw image on canvas
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(origImage, 0, 0, width, height);
   } else {
-    height = Math.round(width * resizeHeight / resizeWidth);
+    throw new Error('Unknown resizeMode: ' + resizeMode);
   }
-
-  canvas.width = resizeWidth <= width ? resizeWidth : width;
-  canvas.height = resizeHeight <= height ? resizeHeight : height;
-
-  let offsetX = origImage.width / 2 - width / 2;
-  let offsetY = origImage.height / 2 - height / 2;
-
-  //draw image on canvas
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(origImage, offsetX, offsetY, width, height, 0, 0, canvas.width, canvas.height);
 
   // get the data from canvas as 70% jpg (or specified type).
   return canvas.toDataURL(resizeType, resizeQuality);

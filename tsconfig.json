@@ -12,7 +12,8 @@
     "moduleResolution": "node",
     "types": [
       "core-js",
-      "node"
+      "node",
+      "cropperjs"
     ]
   },
   "exclude": [
