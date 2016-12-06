@@ -6,6 +6,8 @@ import {FileUploader} from './file-uploader';
 import {UploadedFile} from './uploaded-file';
 import 'rxjs/add/operator/filter';
 import Cropper from 'cropperjs';
+import {CropOptions} from './interfaces';
+import {cssTemplate, htmlTemplate} from './template';
 
 export enum Status {
   NotSelected,
@@ -18,8 +20,8 @@ export enum Status {
 
 @Component({
   selector: 'fancy-image-uploader',
-  template: require('./fancy-image-uploader.component.html'),
-  styles: [require('./fancy-image-uploader.component.css')],
+  template: htmlTemplate,
+  styles: [cssTemplate],
   host: {
     '[style.width]': 'thumbnailWidth + "px"',
     '[style.height]': 'thumbnailHeight + "px"',
@@ -111,7 +113,7 @@ export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterView
     }
   }
 
-  registerOnChange(fn) {
+  registerOnChange(fn: (_: any) => void) {
     this.propagateChange = fn;
   }
 
@@ -243,7 +245,7 @@ export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterView
     this.progress = 0;
     this.status = Status.Uploading;
 
-    let cropOptions = undefined;
+    let cropOptions: CropOptions = undefined;
 
     if (this.cropper) {
       let scale = this.origImageWidth / this.cropper.getImageData().naturalWidth;
@@ -301,7 +303,7 @@ export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterView
     this.removeImage();
   }
 
-  drop(e) {
+  drop(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -313,18 +315,18 @@ export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterView
     this.updateDragOverlayStyles(false);
   }
 
-  dragenter(e) {
+  dragenter(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  dragover(e) {
+  dragover(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
     this.updateDragOverlayStyles(true);
   }
 
-  dragleave(e) {
+  dragleave(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
     this.updateDragOverlayStyles(false);

@@ -1,3 +1,4 @@
+import { Observer } from 'rxjs/Rx';
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
 import {Observable} from 'rxjs/Observable';
@@ -88,7 +89,7 @@ export class FileUploader {
   }
 
   getFile(url: string, options: { authToken?: string, authTokenPrefix?: string}): Observable<File> {
-    return Observable.create(observer => {
+    return Observable.create((observer: Observer<File>) => {
       let xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
       xhr.responseType = 'blob';
