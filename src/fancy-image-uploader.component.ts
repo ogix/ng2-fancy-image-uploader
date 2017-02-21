@@ -5,7 +5,7 @@ import {createImage, resizeImage} from './utils';
 import {FileUploader} from './file-uploader';
 import {UploadedFile} from './uploaded-file';
 import 'rxjs/add/operator/filter';
-import Cropper from 'cropperjs';
+import * as Cropper from 'cropperjs';
 import {CropOptions} from './interfaces';
 import {cssTemplate, htmlTemplate} from './template';
 
@@ -51,7 +51,7 @@ export class FancyImageUploaderComponent implements OnInit, OnDestroy, AfterView
   origImageWidth: number;
   orgiImageHeight: number;
 
-  cropper: cropperjs.Cropper = undefined;
+  cropper: Cropper = undefined;
   fileToUpload: File;
 
   @ViewChild('imageElement') imageElement: ElementRef;

@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "outDir": "dist",
     "target": "es5",
-    "outDir": "./dist",
-    "baseUrl": "./src",
-    "sourceMap": true,
-    "declaration": true,
+    "module": "es2015",
+    "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "removeComments": true,
-    "moduleResolution": "node",
+    "sourceMap": false,
+    "noEmitHelpers": false,
+    "noImplicitAny": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "lib": ["es2015", "dom"],
     "types": [
-      "core-js",
       "node",
       "cropperjs"
     ]
@@ -20,12 +22,11 @@
     "node_modules",
     "demo"
   ],
-  "awesomeTypescriptLoaderOptions": {
-    "useWebpackText": true
-  },
-  "compileOnSave": false,
-  "buildOnSave": false,
-  "atom": {
-    "rewriteTsconfig": false
+  "files": [
+    "./index.ts"
+  ],
+  "angularCompilerOptions": {
+    "genDir": "compiled",
+    "skipTemplateCodegen": true
   }
 }
