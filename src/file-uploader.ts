@@ -1,9 +1,9 @@
 import { Observer } from 'rxjs/Rx';
-import {Injectable} from '@angular/core';
-import {Subject} from 'rxjs/Subject';
-import {Observable} from 'rxjs/Observable';
-import {UploadedFile} from './uploaded-file';
-import {FileUploaderOptions, CropOptions} from './interfaces';
+import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
+import { UploadedFile } from './uploaded-file';
+import { FileUploaderOptions, CropOptions } from './interfaces';
 
 @Injectable()
 export class FileUploader {
@@ -25,16 +25,16 @@ export class FileUploader {
     form.append(options.fieldName, file, file.name);
 
     if (cropOptions) {
-      form.append('X', cropOptions.x);
-      form.append('Y', cropOptions.y);
-      form.append('Width', cropOptions.width);
-      form.append('Height', cropOptions.height);
+      form.append('X', cropOptions.x.toString());
+      form.append('Y', cropOptions.y.toString());
+      form.append('Width', cropOptions.width.toString());
+      form.append('Height', cropOptions.height.toString());
     }
 
     let uploadingFile = new UploadedFile(
-        this.generateRandomIndex(),
-        file.name,
-        file.size
+      this.generateRandomIndex(),
+      file.name,
+      file.size
     );
 
     xhr.upload.onprogress = (e: ProgressEvent) => {
@@ -59,13 +59,13 @@ export class FileUploader {
       let success = this.isSuccessCode(xhr.status);
 
       if (!success) {
-          uploadingFile.setError();
+        uploadingFile.setError();
       }
 
       uploadingFile.onFinished(
-          xhr.status,
-          xhr.statusText,
-          xhr.response
+        xhr.status,
+        xhr.statusText,
+        xhr.response
       );
 
       this._fileProgress$.next(uploadingFile);
@@ -88,7 +88,7 @@ export class FileUploader {
     return uploadingFile.id;
   }
 
-  getFile(url: string, options: { authToken?: string, authTokenPrefix?: string}): Observable<File> {
+  getFile(url: string, options: { authToken?: string, authTokenPrefix?: string }): Observable<File> {
     return Observable.create((observer: Observer<File>) => {
       let xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
@@ -102,7 +102,7 @@ export class FileUploader {
           observer.complete();
         } else {
           let contentType = xhr.getResponseHeader('Content-Type');
-          let blob = new File([xhr.response], 'filename', {type: contentType});
+          let blob = new File([xhr.response], 'filename', { type: contentType });
 
           if (blob.size > 0) {
             observer.next(blob);
@@ -134,7 +134,7 @@ export class FileUploader {
     options.fieldName = options.fieldName || 'file';
   }
 
-  private isSuccessCode(status:number):boolean {
+  private isSuccessCode(status: number): boolean {
     return (status >= 200 && status < 300) || status === 304;
   }
 
